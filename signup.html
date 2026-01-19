@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Create Account</h2>
+
+    <form id="signupForm">
+        <label>Full Name</label>
+        <input type="text" id="fullName" placeholder="Enter your name" required>
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+
+        <label>Password</label>
+        <div class="password-box">
+            <input type="password" id="password" placeholder="Create password" required>
+            <span class="toggle-password" onclick="togglePassword()">👁️</span>
+        </div>
+
+        <label>Invitation Code</label>
+        <input type="number" id="inviteCode" placeholder="Invitation Code" required>
+
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <div class="links">
+        <a href="index.html">Already have an account? Login</a>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.querySelector(".toggle-password");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        passwordInput.type = "password";
+        icon.textContent = "👁️";
+    }
+}
+
+document.getElementById("signupForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const data = {
+        fullName: document.getElementById("fullName").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        inviteCode: document.getElementById("inviteCode").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:5000/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+
+            // ✅ Save user data
+            localStorage.setItem("user", JSON.stringify({
+                fullName: data.fullName,
+                email: data.email,
+                inviteCode: data.inviteCode
+            }));
+
+            alert("Successfully registered");
+            window.location.href = "account.html";
+
+        } else {
+            alert(result.message || "Signup failed");
+        }
+
+    } catch (error) {
+        alert("Server error");
+    }
+});
+</script>
+
+</body>
+</html>

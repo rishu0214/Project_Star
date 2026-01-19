@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Leela</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background: url("../images/OD.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .main-box {
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 20px;
+      width: 300px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .row, .profit-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .select-box, .profit-box {
+      flex: 1;
+      border: 1px solid white;
+      text-align: center;
+      padding: 12px 0;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+
+    .select-box.active, .profit-box.active {
+      background: cyan;
+      color: black;
+    }
+
+    .input-box {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 20px;
+      background: black;
+      color: white;
+      border-radius: 10px;
+      border: 1px solid white;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: rgba(0,0,0,0.85);
+      border: 1px solid cyan;
+      padding: 25px;
+      width: 260px;
+      text-align: center;
+      border-radius: 15px;
+    }
+    .back-link {
+  color: cyan;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+}
+
+    #okBtn { display: none; }
+  </style>
+</head>
+
+<body>
+
+<div class="main-box">
+  <h2>Orchid Hotel</h2>
+
+  <div class="row" id="topSelect">
+    <div class="select-box">Comment</div>
+    <div class="select-box">Share</div>
+    <div class="select-box">Like</div>
+  </div>
+
+  <div class="profit-container" id="profitSelect">
+    <div class="profit-box">30S<br>30%</div>
+    <div class="profit-box">60S<br>60%</div>
+    <div class="profit-box">90S<br>90%</div>
+  </div>
+
+  <input type="number" class="input-box" placeholder="Enter amount">
+
+  <button class="submit-btn">SUBMIT</button><br>
+  <a href="../review.html" class="back-link">← Back</a>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="timerModal">
+  <div class="modal-box">
+    <h3 id="timerText">30s</h3>
+    <p id="resultText"></p>
+    <button id="okBtn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+  function makeSelectable(containerId, className) {
+    const boxes = document.getElementById(containerId).getElementsByClassName(className);
+    for (let box of boxes) {
+      box.onclick = () => {
+        [...boxes].forEach(b => b.classList.remove("active"));
+        box.classList.add("active");
+      };
+    }
+  }
+
+  makeSelectable("topSelect", "select-box");
+  makeSelectable("profitSelect", "profit-box");
+
+  const submitBtn = document.querySelector(".submit-btn");
+  const modal = document.getElementById("timerModal");
+  const timerText = document.getElementById("timerText");
+  const resultText = document.getElementById("resultText");
+  const okBtn = document.getElementById("okBtn");
+
+  submitBtn.onclick = () => {
+    const action = document.querySelector("#topSelect .active");
+    const profitBox = document.querySelector("#profitSelect .active");
+    const amount = Number(document.querySelector(".input-box").value);
+
+    if (!action || !profitBox || !amount) {
+      alert("Please complete all fields");
+      return;
+    }
+
+    const seconds = profitBox.innerText.includes("30") ? 30 :
+                    profitBox.innerText.includes("60") ? 60 : 90;
+
+    const percent = seconds;
+
+    startTimer(seconds, percent, amount, action.innerText);
+  };
+
+  function startTimer(seconds, percent, amount, action) {
+    modal.style.display = "flex";
+    okBtn.style.display = "none";
+    resultText.innerText = "";
+
+    let time = seconds;
+    timerText.innerText = time + "s";
+
+    const interval = setInterval(() => {
+      time--;
+      timerText.innerText = time + "s";
+
+      if (time <= 0) {
+        clearInterval(interval);
+
+        const profit = amount + (amount * percent / 100);
+
+        timerText.innerText = "DONE";
+        resultText.innerText = "+₹" + profit.toFixed(0);
+        okBtn.style.display = "inline-block";
+
+        // ✅ SAVE TO PORTFOLIO (NEW LOGIC ONLY)
+        const user = JSON.parse(localStorage.getItem("user"));
+if (!user) return;
+
+const key = `portfolio_${user.email}`;
+
+const portfolio = JSON.parse(localStorage.getItem(key)) || [];
+portfolio.push({
+  hotel: "Orchid Hotel",
+  action: action,
+  time: seconds + "S",
+  profit: "+₹" + profit.toFixed(0)
+});
+
+localStorage.setItem(key, JSON.stringify(portfolio));
+
+      }
+    }, 1000);
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+  }
+</script>
+
+</body>
+</html>
