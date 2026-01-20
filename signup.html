@@ -60,7 +60,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     };
 
     try {
-        const response = await fetch("http://localhost:5000/signup", {
+        const res = await fetch("https://star-plaza.onrender.com/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
