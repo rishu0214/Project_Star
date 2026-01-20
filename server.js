@@ -8,6 +8,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 🔹 ROOT ROUTE
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "Star Plaza Backend is Live 🚀",
+        status: "OK"
+    });
+});
+
 // 🔹 MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected"))
